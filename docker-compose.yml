@@ -1,0 +1,27 @@
+name: try-on-anywear
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      TRYON_PROVIDER: ${TRYON_PROVIDER:-mock}
+      FRONTEND_ORIGINS: http://localhost:8080
+      RATE_LIMIT_REQUESTS: ${RATE_LIMIT_REQUESTS:-5}
+      REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8000
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
